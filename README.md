@@ -1,51 +1,36 @@
-# Smart Grocery Assistant
+<h1 align="center">🛒 Smart Grocery Assistant</h1>
 
-A small Streamlit app that helps manage pantry items and generate meal suggestions and shopping lists.
+<p align="center">
+A smart Streamlit-based assistant that helps you manage pantry inventory, plan meals, and generate shopping lists automatically.
+</p>
 
-## Deployment-ready changes made
-- Removed embedded API key from `.streamlit/secrets.toml` (now empty). Use environment variables or Streamlit secrets for production.
-- Added `.gitignore` with `.streamlit/secrets.toml` excluded.
-- Added a `Procfile` for simple PaaS deployment (e.g., Heroku).
+<p align="center">
+<img src="https://img.shields.io/badge/Framework-Streamlit-red?style=for-the-badge">
+<img src="https://img.shields.io/badge/Language-Python-blue?style=for-the-badge">
+<img src="https://img.shields.io/badge/Status-Active-green?style=for-the-badge">
+<img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge">
+</p>
 
-## Run locally
-1. Create and activate a virtual environment.
+---
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
+## ✨ Features
 
-2. Install dependencies.
+- 📦 **Pantry Inventory Manager** — Add, update, and delete grocery items  
+- 🍽 **Meal Suggestions** — Recipe & meal planning based on available ingredients  
+- 📋 **Smart Shopping List** — Automatically generates what needs to be purchased  
+- ☁️ **Easy Deployment** — Works on Heroku, Render, Railway etc.  
+- 🔐 **Secure Secrets Management** via environment variables or Streamlit secrets  
 
-```powershell
-pip install -r requirements.txt
-```
+---
 
-3. Provide your Google API key either via environment variable or Streamlit secrets.
+## 🚀 Live Demo
+🔗 *(Coming soon — will be updated after deployment)*
 
-- Environment variable (PowerShell):
+---
 
-```powershell
-$env:GOOGLE_API_KEY = "your_api_key_here"
-```
+## 🛠 Installation & Setup
 
-- Or add to `.streamlit/secrets.toml` (local only — do NOT commit your real key):
-
-```toml
-GOOGLE_API_KEY = "your_api_key_here"
-```
-
-4. Run the app:
-
-```powershell
-streamlit run app.py
-```
-
-## Deploy (example with Heroku)
-1. Ensure `Procfile` exists (provided).
-2. Set the `GOOGLE_API_KEY` as a config var on the platform.
-3. Push the repo and deploy.
-
-## Notes
-- No code behavior in `app.py` was changed.
-- Secrets are intentionally left out of the repository. Add keys via environment variables or your host's secrets manager before deploying.
+### 1️⃣ Clone repository
+```bash
+git clone https://github.com/Chirandip-dev07/Smart-Grocery-Assistant.git
+cd Smart-Grocery-Assistant
