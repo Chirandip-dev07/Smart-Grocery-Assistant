@@ -20,7 +20,7 @@ class MealSuggestionAgent:
                 
                 if self.model_name:
                     self.model = genai.GenerativeModel(self.model_name)
-                    st.success(f"✅ Gemini AI connected with model: {self.model_name}")
+                    st.success("✅ Gemini AI connected")
                 else:
                     st.warning("⚠️ No compatible Gemini model found. Using fallback mode.")
             else:
@@ -41,18 +41,14 @@ class MealSuggestionAgent:
             available_models = list(genai.list_models())
             available_model_names = [model.name for model in available_models]
             
-            st.write(f"🔍 Available models: {[name.split('/')[-1] for name in available_model_names]}")
-            
             for model in preferred_models:
                 full_model_name = f"models/{model}"
                 if full_model_name in available_model_names:
-                    st.write(f"✅ Selected model: {model}")
                     return model
             
             for model in available_models:
                 if 'generateContent' in model.supported_generation_methods:
                     selected = model.name.split('/')[-1]
-                    st.write(f"⚠️ Using available model: {selected}")
                     return selected
             
             return None
@@ -225,8 +221,8 @@ class MealSuggestionAgent:
             if available_count >= len(meal['ingredients']) * 0.5:
                 meal['missing_ingredients'] = missing_ingredients
                 suitable_meals.append(meal)
-        
-            return suitable_meals[:3]
+
+        return suitable_meals[:3]
     
     def get_custom_dish_ingredients(self, dish_name: str, pantry_items: List[str], preferences: Dict) -> Dict:
         """Analyze custom dish"""
