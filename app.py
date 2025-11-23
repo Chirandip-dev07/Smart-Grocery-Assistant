@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px
 from agents.orchestrator import OrchestratorAgent
 
-# Page configuration
 st.set_page_config(
     page_title="Smart Grocery Assistant",
     page_icon="🛒",
@@ -11,7 +10,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
 st.markdown("""
 <style>
     .main-header {
@@ -39,18 +37,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def main():
-    # Header
     st.markdown('<h1 class="main-header">🛒 Smart Grocery Assistant</h1>', unsafe_allow_html=True)
     st.markdown("### Your AI-Powered Kitchen Companion")
     
-    # Initialize orchestrator
     orchestrator = OrchestratorAgent()
     
-    # Sidebar
     with st.sidebar:
         st.header("⚙️ Configuration")
-        
-        # User Preferences
         st.subheader("User Preferences")
         diet = st.selectbox("Diet", ["vegetarian", "non-vegetarian", "vegan"], index=0)
         spice_level = st.select_slider("Spice Level", ["mild", "medium", "hot"], value="medium")
@@ -62,7 +55,6 @@ def main():
             default=[]
         )
         
-        # Update preferences
         if st.button("Update Preferences"):
             orchestrator.update_preferences({
                 "diet": diet,
@@ -72,7 +64,6 @@ def main():
             })
             st.success("Preferences updated!")
     
-    # Main tabs
     tab1, tab2, tab3, tab4 = st.tabs(["🏠 Dashboard", "🫙 Pantry", "🍽️ Meal Planning", "🛒 Shopping"])
     
     with tab1:
@@ -102,7 +93,6 @@ def show_dashboard(orchestrator):
     with col3:
         st.metric("Average Savings", "₹45")
     
-    # Quick actions
     st.subheader("🚀 Quick Actions")
     col1, col2, col3 = st.columns(3)
     
@@ -131,7 +121,6 @@ def show_pantry_management(orchestrator):
         pantry_data = orchestrator.pantry_agent.get_pantry_data()
         
         if pantry_data:
-            # Convert to DataFrame for better display
             pantry_df = pd.DataFrame([
                 {
                     "Item": item.title(),
@@ -144,7 +133,6 @@ def show_pantry_management(orchestrator):
             
             st.dataframe(pantry_df, use_container_width=True)
             
-            # Statistics
             stats = orchestrator.pantry_agent.display_pantry_stats()
             st.write(f"**Total Items:** {stats['total_items']}")
             for category, count in stats['categories'].items():
@@ -212,7 +200,6 @@ def show_meal_planning(orchestrator):
             elif result.get('success'):
                 st.success("🎉 Meal plan generated successfully!")
                 
-                # Display meal suggestions
                 st.subheader("Recommended Meals")
                 for i, meal in enumerate(result['meal_suggestions']):
                     with st.expander(f"🍳 {meal['name']} - {meal.get('cooking_time', 'N/A')} - {meal.get('difficulty', 'N/A')}", expanded=i==0):
@@ -233,7 +220,6 @@ def show_meal_planning(orchestrator):
                             for j, step in enumerate(meal.get('instructions', []), 1):
                                 st.write(f"{j}. {step}")
                 
-                # Shopping list preview
                 if result.get('shopping_list'):
                     st.subheader("🛒 Required Shopping Items")
                     shopping_df = pd.DataFrame(result['shopping_list'])
@@ -262,7 +248,6 @@ def show_shopping(orchestrator):
         st.subheader("Shopping List")
         
         if result.get('shopping_list'):
-            # Group by category
             by_category = {}
             for item in result['shopping_list']:
                 category = item['category']
@@ -290,12 +275,10 @@ def show_shopping(orchestrator):
             if result.get('savings', 0) > 0:
                 st.metric("Total Savings", f"₹{result['savings']}")
             
-            # Price comparison chart
             price_data = result['price_comparison']
             stores = list(price_data.keys())
             totals = [price_data[store]['total'] for store in stores]
             
-            # Create comparison chart
             comparison_df = pd.DataFrame({
                 'Store': stores,
                 'Total Cost': totals

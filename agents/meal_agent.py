@@ -16,8 +16,6 @@ class MealSuggestionAgent:
             api_key = st.secrets.get("GOOGLE_API_KEY") or os.getenv("GOOGLE_API_KEY")
             if api_key:
                 genai.configure(api_key=api_key)
-                
-                # Try to get available models and select the best one
                 self.model_name = self.select_available_model()
                 
                 if self.model_name:
@@ -33,28 +31,24 @@ class MealSuggestionAgent:
     def select_available_model(self):
         """Select the best available model from the API"""
         try:
-            # List of models to try in priority order
             preferred_models = [
-                "gemini-2.5-flash-lite",  # Primary choice
-                "gemini-1.5-flash",       # Fallback 1
-                "gemini-1.5-pro",         # Fallback 2
-                "gemini-1.0-pro",         # Fallback 3
+                "gemini-2.5-flash-lite",
+                "gemini-1.5-flash",
+                "gemini-1.5-pro",
+                "gemini-1.0-pro",
             ]
             
-            # Get available models
             available_models = list(genai.list_models())
             available_model_names = [model.name for model in available_models]
             
             st.write(f"🔍 Available models: {[name.split('/')[-1] for name in available_model_names]}")
             
-            # Find the first preferred model that's available
             for model in preferred_models:
                 full_model_name = f"models/{model}"
                 if full_model_name in available_model_names:
                     st.write(f"✅ Selected model: {model}")
                     return model
             
-            # If no preferred model found, use first available model that supports generation
             for model in available_models:
                 if 'generateContent' in model.supported_generation_methods:
                     selected = model.name.split('/')[-1]
@@ -65,7 +59,6 @@ class MealSuggestionAgent:
             
         except Exception as e:
             st.error(f"❌ Error detecting models: {e}")
-            # Fallback to the specific model we know should work
             return "gemini-2.5-flash-lite"
     
     def suggest_meals(self, pantry_items: List[str], preferences: Dict) -> List[Dict]:
@@ -84,7 +77,6 @@ class MealSuggestionAgent:
         prompt = self._build_meal_prompt(pantry_items, preferences)
         
         try:
-            # Configure generation for better results
             generation_config = {
                 "temperature": 0.7,
                 "top_p": 0.8,
@@ -124,10 +116,8 @@ class MealSuggestionAgent:
     def _parse_response(self, response_text: str, pantry_items: List[str]) -> List[Dict]:
         """Parse Gemini response with robust error handling"""
         try:
-            # Clean response text
             cleaned_text = response_text.strip()
             
-            # Remove markdown code blocks
             if cleaned_text.startswith('```json'):
                 cleaned_text = cleaned_text[7:]
             if cleaned_text.startswith('```'):
@@ -136,7 +126,6 @@ class MealSuggestionAgent:
                 cleaned_text = cleaned_text[:-3]
             cleaned_text = cleaned_text.strip()
             
-            # Try to extract JSON if not directly parseable
             start_idx = cleaned_text.find('[')
             end_idx = cleaned_text.rfind(']') + 1
             
@@ -144,7 +133,6 @@ class MealSuggestionAgent:
                 json_str = cleaned_text[start_idx:end_idx]
                 suggestions = json.loads(json_str)
             else:
-                # If no array found, try to find any JSON structure
                 start_idx = cleaned_text.find('{')
                 end_idx = cleaned_text.rfind('}') + 1
                 if start_idx >= 0 and end_idx > start_idx:
@@ -154,11 +142,9 @@ class MealSuggestionAgent:
                 else:
                     raise ValueError("No valid JSON found in response")
             
-            # Ensure we have a list
             if not isinstance(suggestions, list):
                 suggestions = [suggestions]
             
-            # Add missing ingredients analysis
             pantry_lower = [item.lower() for item in pantry_items]
             for meal in suggestions:
                 missing = []
@@ -174,7 +160,7 @@ class MealSuggestionAgent:
                             missing.append(ingredient)
                 meal['missing_ingredients'] = missing
             
-            return suggestions[:3]  # Return max 3 meals
+            return suggestions[:3]
             
         except Exception as e:
             st.error(f"⚠️ Failed to parse Gemini response: {e}")
@@ -186,7 +172,6 @@ class MealSuggestionAgent:
         pantry_str = " ".join(pantry_items).lower()
         diet = preferences.get('diet', 'vegetarian')
         
-        # Enhanced fallback meals with better matching
         all_meals = [
             {
                 "name": "Tomato Rice",
@@ -218,13 +203,11 @@ class MealSuggestionAgent:
             }
         ]
         
-        # Filter meals based on available ingredients and diet
         suitable_meals = []
         for meal in all_meals:
             if diet != "vegetarian" and "chicken" in meal['name'].lower():
                 continue
                 
-            # Count available ingredients
             available_count = 0
             missing_ingredients = []
             
@@ -239,12 +222,11 @@ class MealSuggestionAgent:
                 else:
                     missing_ingredients.append(ingredient)
             
-            # Include meal if at least 50% ingredients are available
             if available_count >= len(meal['ingredients']) * 0.5:
                 meal['missing_ingredients'] = missing_ingredients
                 suitable_meals.append(meal)
         
-        return suitable_meals[:3]  # Return max 3 meals
+            return suitable_meals[:3]
     
     def get_custom_dish_ingredients(self, dish_name: str, pantry_items: List[str], preferences: Dict) -> Dict:
         """Analyze custom dish"""
@@ -267,7 +249,7 @@ class MealSuggestionAgent:
                 """
                 
                 generation_config = {
-                    "temperature": 0.3,  # Lower temperature for more consistent output
+                    "temperature": 0.3,
                     "top_p": 0.8,
                     "top_k": 40,
                     "max_output_tokens": 1024,
@@ -283,7 +265,6 @@ class MealSuggestionAgent:
     def _parse_custom_response(self, response_text: str, dish_name: str, pantry_items: List[str]) -> Dict:
         """Parse custom dish response"""
         try:
-            # Clean response
             cleaned_text = response_text.strip()
             if cleaned_text.startswith('```json'):
                 cleaned_text = cleaned_text[7:]
@@ -293,7 +274,6 @@ class MealSuggestionAgent:
                 cleaned_text = cleaned_text[:-3]
             cleaned_text = cleaned_text.strip()
             
-            # Extract JSON
             start_idx = cleaned_text.find('{')
             end_idx = cleaned_text.rfind('}') + 1
             if start_idx >= 0 and end_idx > start_idx:
@@ -302,7 +282,6 @@ class MealSuggestionAgent:
             else:
                 meal_data = json.loads(cleaned_text)
             
-            # Add missing ingredients analysis
             pantry_lower = [item.lower() for item in pantry_items]
             missing_ingredients = []
             for ingredient in meal_data.get('ingredients', []):
@@ -318,7 +297,6 @@ class MealSuggestionAgent:
             
             meal_data['missing_ingredients'] = missing_ingredients
             
-            # Ensure all required fields
             meal_data.setdefault('name', dish_name)
             meal_data.setdefault('cooking_time', '30 minutes')
             meal_data.setdefault('difficulty', 'Medium')
@@ -334,7 +312,6 @@ class MealSuggestionAgent:
         """Enhanced fallback for custom dishes"""
         dish_lower = dish_name.lower()
         
-        # Enhanced common ingredient patterns
         common_ingredients = {
             "biriyani": ["basmati rice", "chicken", "onions", "tomatoes", "yogurt", "ginger", "garlic", "biriyani masala", "mint", "coriander", "oil", "spices"],
             "biryani": ["basmati rice", "chicken", "onions", "tomatoes", "yogurt", "ginger", "garlic", "biryani masala", "mint", "coriander", "oil", "spices"],
@@ -345,17 +322,14 @@ class MealSuggestionAgent:
             "salad": ["lettuce", "vegetables", "dressing", "herbs", "protein"]
         }
         
-        # Find matching dish type
         ingredients = []
         for dish_type, common_ingreds in common_ingredients.items():
             if dish_type in dish_lower:
                 ingredients = common_ingreds
-        
-        # If no match, use generic ingredients
+
         if not ingredients:
             ingredients = ["main ingredient", "vegetables", "spices", "oil", "herbs", "seasoning"]
         
-        # Analyze missing ingredients
         pantry_lower = [item.lower() for item in pantry_items]
         missing_ingredients = []
         for ingredient in ingredients:
@@ -367,7 +341,6 @@ class MealSuggestionAgent:
             if not found:
                 missing_ingredients.append(ingredient)
         
-        # Special instructions for common dishes
         if 'biriyani' in dish_lower or 'biryani' in dish_lower:
             instructions = [
                 "Marinate chicken with yogurt and spices for 30 minutes",

@@ -33,24 +33,19 @@ class OrchestratorAgent:
         }
     
     def run_complete_workflow(self, servings=2):
-        """Execute the complete multi-agent workflow"""
         results = {}
         
         try:
-            # Step 1: Get pantry items
             pantry_items = self.pantry_agent.get_current_pantry()
             if not pantry_items:
                 return {"error": "Pantry is empty! Please add some items first."}
             
-            # Step 2: Get meal suggestions
             meal_suggestions = self.meal_agent.suggest_meals(pantry_items, self.user_preferences)
             if not meal_suggestions:
                 return {"error": "No suitable meals found with current pantry items."}
             
-            # Step 3: Generate shopping list
             shopping_list = self.shopping_agent.generate_list(meal_suggestions, servings)
             
-            # Step 4: Price optimization (only if shopping list is not empty)
             if shopping_list:
                 price_optimization = self.price_agent.optimize_purchases(shopping_list)
             else:
