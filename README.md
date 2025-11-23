@@ -79,7 +79,7 @@ python app.py
 
 ------------------------------------------------------------------------
 
-##Click here to visit my website: [Live Demo](https://smart-grocery-assistant-system.streamlit.app/)
+Click here to visit my website: [Live Demo](https://smart-grocery-assistant-system.streamlit.app/)
 
 ## 🎯 Future Improvements
 
